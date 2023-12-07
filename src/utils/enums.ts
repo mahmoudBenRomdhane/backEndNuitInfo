@@ -10,7 +10,7 @@ export enum Role {
 }
 
 export enum Question {
-  FirstSchool = "what is your FirstSchool",
-  BestFriendName = "what is your best friend name",
-  Free = "what do you think about greenIt",
+  FirstSchool = "what is your FirstSchool ?",
+  BestFriendName = "what is your best friend name ?",
+  FootballClub = "What is your favorite football club ?",
 }
