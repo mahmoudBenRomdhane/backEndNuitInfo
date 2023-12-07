@@ -14,4 +14,5 @@ module.exports = {
   mongoDbUri: env.MONGODBURL,
   emailSender: env.EMAIL_SENDER,
   emailPass: env.EMAIL_PASS,
+  tokenKey: env.TOKEN_KEY,
 };

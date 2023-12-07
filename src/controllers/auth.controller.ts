@@ -6,6 +6,7 @@ const bcrypt = require("bcryptjs");
 const { v4: uuidv4 } = require("uuid");
 const DeviceDetector = require("node-device-detector");
 const jwt = require("jsonwebtoken");
+const { tokenKey } = require("../config/vars");
 
 exports.register = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -99,13 +100,13 @@ exports.checkConfirmationCode = async (
           );
         }
         await Confirmation.findByIdAndDelete(confirmation._id);
-        return res.status(200).json({ message: "email verified" });
+        return res.status(201).json({ message: "email verified" });
       } else {
         await Confirmation.findByIdAndDelete(confirmation._id);
-        return res.status(403).json({ message: "expired code" });
+        return res.status(200).json({ message: "expired code" });
       }
     } else {
-      return res.status(403).json({ message: "not found" });
+      return res.status(400).json({ message: "not found" });
     }
   } catch (err) {
     console.log("eded", err);
@@ -124,6 +125,10 @@ exports.SendVerification = async (
     const _user = await User.findOne({
       email: email,
     });
+    const detector = new DeviceDetector();
+    const clientInfo = detector.detect(req.headers["user-agent"]);
+    const clientAddress =
+      req.headers["x-forwarded-for"] || req.socket.remoteAddress;
     if (_user) {
       if (_user.emailVerified === true)
         return res.status(404).json({
@@ -153,55 +158,66 @@ exports.SendVerification = async (
 exports.login = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { email, password } = req.body;
+    const { securityQuestion } = req.body;
     const _user = await User.findOne({ email: email });
-    console.log("zzz", _user);
-
+    const detector = new DeviceDetector();
+    const clientInfo = detector.detect(req.headers["user-agent"]);
+    const clientAddress =
+      req.headers["x-forwarded-for"] || req.socket.remoteAddress;
     if (!_user) return res.status(403).json({ message: "wrong credentials" });
     if (_user.emailVerified === false)
       return res.status(404).json({ message: "please activate your email" });
     const isMatch = await bcrypt.compare(password, _user.password);
-    // if (!isMatch) return res.status(403).json({ message: "wrong credentials" });
-    // res.cookie("test", "test", { maxAge: 3600000 });
-    // const isPrivateMode = !req.cookies.test;
+    if (!isMatch) return res.status(403).json({ message: "wrong credentials" });
+    res.cookie("test", "test", { maxAge: 3600000 });
+    const isPrivateMode = !req.cookies.test;
 
-    // if (isPrivateMode) {
-    //   const uuid = uuidv4();
-    //   const clientAddress =
-    //     req.headers["x-forwarded-for"] || req.socket.remoteAddress;
-    //   await User.findByIdAndUpdate(
-    //     _user._id,
-    //     {
-    //       emailVerified: true,
-    //       $push: {
-    //         devices: {
-    //           verified: false,
-    //           deviceId: uuid,
-    //           ipAddress: clientAddress,
-    //         },
-    //       },
-    //     },
-    //     { new: true }
-    //   );
-    //   res.status(200).json({
-    //     status: "success",
-    //     message: "New device detected. Additional verification required.",
-    //     data: {
-    //       deviceId: uuid,
-    //       question: _user.securityQuestion.question,
-    //     },
-    //   });
-    // }
-    const token = jwt.sign(
-      {
-        email: _user.email,
-      },
-      "zedznjkjerfvnkjenrfjkenrfekjrnferf",
-      { expiresIn: "365d" }
-    );
-    res.status(200).json({
-      message: "bech inik el noum ched yedek b hedhi",
-      token: token,
+    if (isPrivateMode && !securityQuestion)
+      return res.status(205).json({
+        status: "success",
+        message: "New device detected. Additional verification required.",
+        question: _user.securityQuestion.question,
+      });
+
+    const matchingDevice = _user.devices.find((device: any) => {
+      return (
+        device.os ===
+          `${clientInfo.os.name}_${clientInfo.os.version}_${clientInfo.os.platform}` &&
+        device.browser === clientInfo.client.name &&
+        device.ipAddress === clientAddress
+      );
     });
+    if (matchingDevice) {
+      const token = jwt.sign(
+        {
+          email: _user.email,
+        },
+        tokenKey,
+        { expiresIn: "365d" }
+      );
+      res.status(200).json({
+        message: "sucess",
+        token: token,
+      });
+    } else if (securityQuestion) {
+      const token = jwt.sign(
+        {
+          email: _user.email,
+        },
+        tokenKey,
+        { expiresIn: "365d" }
+      );
+      res.status(200).json({
+        message: "sucess",
+        token: token,
+      });
+    } else {
+      res.status(201).json({
+        status: "success",
+        message: "New device detected. Additional verification required.",
+        question: _user.securityQuestion.question,
+      });
+    }
   } catch (err) {
     console.log("aaaaaa", err);
     res.status(404).json({ message: "error" });
@@ -226,22 +242,22 @@ exports.login = async (req: Request, res: Response, next: NextFunction) => {
 //     });
 //   } catch (err) {}
 // };
-// exports.test = async (req: Request, res: Response, next: NextFunction) => {
-//   const detector = new DeviceDetector();
-//   res.cookie("test", "test", { maxAge: 3600000 });
+exports.test = async (req: Request, res: Response, next: NextFunction) => {
+  const detector = new DeviceDetector();
+  res.cookie("test", "test", { maxAge: 3600000 });
 
-//   const isPrivateMode = !req.cookies.test;
-//   if (isPrivateMode)
-//     return res.status(200).json({
-//       isPrivateMode: isPrivateMode,
-//     });
+  const isPrivateMode = !req.cookies.test;
+  if (isPrivateMode)
+    return res.status(200).json({
+      isPrivateMode: isPrivateMode,
+    });
 
-//   const clientInfo = detector.detect(req.headers["user-agent"]);
-//   const clientAddress =
-//     req.headers["x-forwarded-for"] || req.socket.remoteAddress;
-//   res.status(200).json({
-//     os: `${clientInfo.os.name} ${clientInfo.os.version} ${clientInfo.os.platform}`,
-//     browser: clientInfo.client.name,
-//     ipAddress: clientAddress,
-//   });
-// };
+  const clientInfo = detector.detect(req.headers["user-agent"]);
+  const clientAddress =
+    req.headers["x-forwarded-for"] || req.socket.remoteAddress;
+  res.status(200).json({
+    os: `${clientInfo.os.name} ${clientInfo.os.version} ${clientInfo.os.platform}`,
+    browser: clientInfo.client.name,
+    ipAddress: clientAddress,
+  });
+};

@@ -6,8 +6,6 @@ interface IDevice {
   os: string;
   browser: string;
   ipAddress: string;
-  verified: boolean;
-  deviceId?: string;
 }
 interface ISecurityQuestion {
   question: typeof Question;
@@ -81,12 +79,6 @@ const userSchema = new Schema<IUser>(
           type: String,
         },
         ipAddress: {
-          type: String,
-        },
-        verified: {
-          type: String,
-        },
-        deviceId: {
           type: String,
         },
       },
