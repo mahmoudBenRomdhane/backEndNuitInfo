@@ -12,5 +12,5 @@ export enum Role {
 export enum Question {
   FirstSchool = "what is your FirstSchool",
   BestFriendName = "what is your best friend name",
-  Free = "eli iji",
+  Free = "what do you think about greenIt",
 }
