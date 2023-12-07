@@ -12,6 +12,11 @@ exports.register = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { email, firstName, lastName, gender, password, securityQuestion } =
       req.body;
+    const _user = await User.findOne({ email: email });
+    if (_user && _user.emailVerified) return res.sendStatus(400);
+    if (_user && !_user.emailVerified) {
+      await User.findByIdAndDelete(_user._id);
+    }
     const hashedPassword = await bcrypt.hash(password, 12);
     const user = new User({
       firstName,
@@ -28,7 +33,6 @@ exports.register = async (req: Request, res: Response, next: NextFunction) => {
     const ConfirmationCode: string = (
       Math.floor(Math.random() * 900000) + 100000
     ).toString();
-    console.log("ConfirmationCode", ConfirmationCode);
     const hashedConfirmationCode = await bcrypt.hash(ConfirmationCode, 12);
     const uuid = uuidv4();
     new Confirmation({
@@ -66,7 +70,7 @@ exports.checkConfirmationCode = async (
           confirmationCode,
           confirmation.ConfirmationCode
         );
-        if (!isMatch) return res.status(403).json({ message: "Invalid" });
+        if (!isMatch) return res.status(400).json({ message: "error" });
         res.cookie("test", "test", { maxAge: 3600000 });
 
         const isPrivateMode = !req.cookies.test; // private wela postman
@@ -191,6 +195,7 @@ exports.login = async (req: Request, res: Response, next: NextFunction) => {
       const token = jwt.sign(
         {
           email: _user.email,
+          userId: _user._id,
         },
         tokenKey,
         { expiresIn: "365d" }
@@ -199,10 +204,27 @@ exports.login = async (req: Request, res: Response, next: NextFunction) => {
         message: "sucess",
         token: token,
       });
-    } else if (securityQuestion) {
+    } else if (
+      securityQuestion.response === _user?.securityQuestion?.question
+    ) {
+      await User.findByIdAndUpdate(
+        _user._id,
+        {
+          $push: {
+            devices: {
+              os: `${clientInfo.os.name}_${clientInfo.os.version}_${clientInfo.os.platform}`,
+              browser: clientInfo.client.name,
+              ipAddress: clientAddress,
+              verified: true,
+            },
+          },
+        },
+        { new: true }
+      );
       const token = jwt.sign(
         {
           email: _user.email,
+          userId: _user._id,
         },
         tokenKey,
         { expiresIn: "365d" }
