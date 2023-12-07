@@ -26,6 +26,5 @@ jobs:
             cd /home/backend/backEndNuitInfo 
             git pull origin dev
             git status
-            docker stop $(docker ps -q --filter ancestor=dockerized-node )           
-            docker build . -t dockerized-node
-            docker run  -d dockerized-node
+            yarn
+            yarn start
