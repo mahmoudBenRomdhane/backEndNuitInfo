@@ -26,7 +26,29 @@ exports.createPost = async (
 };
 exports.list = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const posts = await PostModel.find();
+    const posts = await PostModel.aggregate([
+      {
+        $lookup: {
+          from: "users",
+          localField: "userId",
+          foreignField: "_id",
+          as: "user",
+        },
+      },
+      {
+        $unwind: "$user",
+      },
+      {
+        $project: {
+          image: 1,
+          upvote: 1,
+          downVote: 1,
+          "user.firstName": 1,
+          "user.lastName": 1,
+        },
+      },
+    ]);
+
     res.status(200).json({
       posts: posts,
     });
@@ -47,9 +69,31 @@ exports.getReactedPostByUser = async (
     const reactions = Reaction.find({
       userId: user.userId,
     });
+    res.status(200).json({
+      reactions: reactions,
+    });
   } catch (err) {
     res.status(400).json({
       message: "error",
+    });
+  }
+};
+exports.addReaction = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { postId, status } = req.body;
+    const user = res.locals.decoded;
+    await new Reaction({
+      postId: postId,
+      userId: user.userId,
+      status: status,
+    });
+  } catch (err) {
+    res.status(400).json({
+      message: "err",
     });
   }
 };
