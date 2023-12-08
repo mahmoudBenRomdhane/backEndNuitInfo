@@ -18,5 +18,29 @@ exports.createPost = async (
       userId: user.userId,
     }).save();
     res.status(200).json({ message: "created" });
-  } catch (err) {}
+  } catch (err) {
+    console.log("err", err);
+
+    res.send(err);
+  }
 };
+exports.list = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const posts = await PostModel.find();
+    res.status(200).json({
+      posts: posts,
+    });
+  } catch (err) {
+    res.status(400).json({
+      message: "error",
+    });
+  }
+};
+// exports.getUserReaction = async (req : Request , res : Response , next : NextFunction) => {
+//   try{
+//     const user = res.locals.decoded;
+
+//   }catch(err){
+
+//   }
+// }

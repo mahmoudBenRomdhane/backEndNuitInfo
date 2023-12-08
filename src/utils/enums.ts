@@ -14,3 +14,7 @@ export enum Question {
   BestFriendName = "what is your best friend name ?",
   FootballClub = "What is your favorite football club ?",
 }
+export enum Status {
+  UP = "up",
+  DOWN = "down",
+}
