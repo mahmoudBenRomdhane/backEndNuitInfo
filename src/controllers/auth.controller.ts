@@ -173,7 +173,7 @@ exports.login = async (req: Request, res: Response, next: NextFunction) => {
     res.cookie("test", "test", { maxAge: 3600000 });
     const isPrivateMode = !req.cookies.test;
     if (isPrivateMode && !securityQuestion)
-      return res.status(200).json({
+      return res.status(201).json({
         status: "success",
         message: "New device detected. Additional verification required.",
         question: _user.securityQuestion.question,
