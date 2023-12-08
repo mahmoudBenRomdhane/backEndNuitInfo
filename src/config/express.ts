@@ -8,12 +8,14 @@ const helmet = require("helmet");
 const routes = require("../routes");
 const cookieParser = require("cookie-parser");
 const mongoSanitize = require("express-mongo-sanitize");
+import path from "path";
 
 const app = express();
 app.use(mongoSanitize());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(morgan("dev"));
 app.use(bodyParser.json({ limit: "5mb" }));
+app.use("/files", express.static(path.join("src/files")));
 app.use(cookieParser());
 app.use(compress());
 app.use(methodOverride());
