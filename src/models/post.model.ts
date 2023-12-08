@@ -16,6 +16,9 @@ const postSchema = new Schema<Ipost>(
       required: true,
       ref: "User",
     },
+    content: {
+      type: String,
+    },
     image: {
       type: String,
       required: false,

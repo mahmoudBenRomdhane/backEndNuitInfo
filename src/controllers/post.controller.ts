@@ -115,7 +115,7 @@ exports.addReaction = async (
 // ) => {
 //   try {
 //     const reactionId = req.params.reactionId;
-//     const { postId, status } = req.body;
+//     const { postId, status, previousStatus } = req.body;
 //     let updateQuery = {};
 //     if (status === "up") {
 //       updateQuery = { $inc: { upvote: 1 } };
@@ -125,6 +125,5 @@ exports.addReaction = async (
 //     await Reaction.findByIdAndUpdate(reactionId, {
 //       status: status,
 //     });
-
 //   } catch (err) {}
 // };
