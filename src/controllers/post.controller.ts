@@ -1,6 +1,6 @@
 export {};
 import { NextFunction, Response, Request } from "express";
-import { PostModel } from "../models";
+import { PostModel, Reaction } from "../models";
 
 exports.createPost = async (
   req: Request,
@@ -36,11 +36,20 @@ exports.list = async (req: Request, res: Response, next: NextFunction) => {
     });
   }
 };
-// exports.getUserReaction = async (req : Request , res : Response , next : NextFunction) => {
-//   try{
-//     const user = res.locals.decoded;
 
-//   }catch(err){
-
-//   }
-// }
+exports.getReactedPostByUser = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const user = res.locals.decoded;
+    const reactions = Reaction.find({
+      userId: user.userId,
+    });
+  } catch (err) {
+    res.status(400).json({
+      message: "error",
+    });
+  }
+};

@@ -241,7 +241,17 @@ exports.login = async (req: Request, res: Response, next: NextFunction) => {
     res.status(404).json({ message: err });
   }
 };
-
+exports.profile = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const user = res.locals.decoded;
+    const userData = await User.findById(user.userId).select(
+      "firstName lastName email"
+    );
+    res.status(200).json({
+      data: userData,
+    });
+  } catch (err) {}
+};
 // exports.addDevice = async (req: Request, res: Response, next: NextFunction) => {
 //   const { deviceId, response } = req.body;
 //   try {
