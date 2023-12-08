@@ -7,6 +7,6 @@ router.route("/register").post(controller.register);
 router.route("/check-Confirmation-Code").post(controller.checkConfirmationCode);
 router.route("/send-verification").post(controller.SendVerification);
 router.route("/login").post(controller.login);
-// router.route("/test").get(controller.test);
+router.route("/test").get(controller.test);
 
 module.exports = router;

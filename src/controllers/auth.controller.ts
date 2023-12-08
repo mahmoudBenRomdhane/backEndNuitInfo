@@ -130,9 +130,6 @@ exports.SendVerification = async (
       email: email,
     });
     const detector = new DeviceDetector();
-    const clientInfo = detector.detect(req.headers["user-agent"]);
-    const clientAddress =
-      req.headers["x-forwarded-for"] || req.socket.remoteAddress;
     if (_user) {
       if (_user.emailVerified === true)
         return res.status(404).json({
@@ -143,7 +140,7 @@ exports.SendVerification = async (
       ).toString();
       const hashedConfirmationCode = await bcrypt.hash(ConfirmationCode, 12);
       const uuid = uuidv4();
-      new Confirmation({
+      await new Confirmation({
         user: _user._id,
         ConfirmationCode: hashedConfirmationCode,
         uuid: uuid,
@@ -175,9 +172,8 @@ exports.login = async (req: Request, res: Response, next: NextFunction) => {
     if (!isMatch) return res.status(403).json({ message: "wrong credentials" });
     res.cookie("test", "test", { maxAge: 3600000 });
     const isPrivateMode = !req.cookies.test;
-
     if (isPrivateMode && !securityQuestion)
-      return res.status(205).json({
+      return res.status(200).json({
         status: "success",
         message: "New device detected. Additional verification required.",
         question: _user.securityQuestion.question,
@@ -205,7 +201,7 @@ exports.login = async (req: Request, res: Response, next: NextFunction) => {
         token: token,
       });
     } else if (
-      securityQuestion.response === _user?.securityQuestion?.question
+      securityQuestion?.response === _user?.securityQuestion?.response
     ) {
       await User.findByIdAndUpdate(
         _user._id,
@@ -242,9 +238,10 @@ exports.login = async (req: Request, res: Response, next: NextFunction) => {
     }
   } catch (err) {
     console.log("aaaaaa", err);
-    res.status(404).json({ message: "error" });
+    res.status(404).json({ message: err });
   }
 };
+
 // exports.addDevice = async (req: Request, res: Response, next: NextFunction) => {
 //   const { deviceId, response } = req.body;
 //   try {
