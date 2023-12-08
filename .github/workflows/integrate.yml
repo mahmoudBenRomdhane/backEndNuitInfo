@@ -26,5 +26,7 @@ jobs:
             cd /home/backend/backEndNuitInfo 
             git pull origin dev
             git status
-            yarn
-            yarn start
+            yarn build 
+            cd build
+            pm2 stop index.js
+            pm2 start index.js
