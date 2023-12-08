@@ -12,7 +12,15 @@ exports.register = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { email, firstName, lastName, gender, password, securityQuestion } =
       req.body;
-
+    const regexPattern =
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    let passwordValidation;
+    if (regexPattern.test(password)) {
+      passwordValidation = true;
+      console.log("Password is valid.");
+    } else {
+      return res.status(404).json({ message: "error" });
+    }
     const _user = await User.findOne({ email: email });
     if (_user && _user.emailVerified) return res.sendStatus(400);
     if (_user && !_user.emailVerified) {
