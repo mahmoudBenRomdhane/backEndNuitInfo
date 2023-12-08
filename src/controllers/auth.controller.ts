@@ -107,7 +107,7 @@ exports.checkConfirmationCode = async (
         return res.status(201).json({ message: "email verified" });
       } else {
         await Confirmation.findByIdAndDelete(confirmation._id);
-        return res.status(200).json({ message: "expired code" });
+        return res.status(410).json({ message: "expired code", status: 410 });
       }
     } else {
       return res.status(400).json({ message: "not found" });
