@@ -91,6 +91,16 @@ exports.addReaction = async (
       postId: postId,
       userId: user.userId,
       status: status,
+    }).save();
+    let updateQuery = {};
+    if (status === "up") {
+      updateQuery = { $inc: { upvote: 1 } };
+    } else if (status === "down") {
+      updateQuery = { $inc: { downVote: 1 } };
+    }
+
+    await PostModel.findByIdAndUpdate(postId, postId, updateQuery, {
+      new: true,
     });
   } catch (err) {
     res.status(400).json({
@@ -98,3 +108,23 @@ exports.addReaction = async (
     });
   }
 };
+// exports.updateReaction = async (
+//   req: Request,
+//   res: Response,
+//   next: NextFunction
+// ) => {
+//   try {
+//     const reactionId = req.params.reactionId;
+//     const { postId, status } = req.body;
+//     let updateQuery = {};
+//     if (status === "up") {
+//       updateQuery = { $inc: { upvote: 1 } };
+//     } else if (status === "down") {
+//       updateQuery = { $inc: { downVote: 1 } };
+//     }
+//     await Reaction.findByIdAndUpdate(reactionId, {
+//       status: status,
+//     });
+
+//   } catch (err) {}
+// };

@@ -7,5 +7,6 @@ const verifyToken = require("../middleware/verifyToken");
 router.route("").post(verifyToken, controller.createPost);
 router.route("").get(verifyToken, controller.list);
 router.route("/reactions").get(verifyToken, controller.getReactedPostByUser);
+router.route("/reaction").post(verifyToken, controller.addReaction);
 
-module.exports = router;
+http: module.exports = router;
