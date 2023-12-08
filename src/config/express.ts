@@ -7,8 +7,10 @@ const cors = require("cors");
 const helmet = require("helmet");
 const routes = require("../routes");
 const cookieParser = require("cookie-parser");
+const mongoSanitize = require("express-mongo-sanitize");
 
 const app = express();
+app.use(mongoSanitize());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(morgan("dev"));
 app.use(bodyParser.json({ limit: "5mb" }));

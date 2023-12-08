@@ -43,6 +43,7 @@ exports.list = async (req: Request, res: Response, next: NextFunction) => {
           image: 1,
           upvote: 1,
           downVote: 1,
+          content: 1,
           "user.firstName": 1,
           "user.lastName": 1,
         },
