@@ -44,8 +44,14 @@ exports.list = async (req: Request, res: Response, next: NextFunction) => {
           upvote: 1,
           downVote: 1,
           content: 1,
+          createdAt: 1,
           "user.firstName": 1,
           "user.lastName": 1,
+        },
+      },
+      {
+        $sort: {
+          createdAt: -1,
         },
       },
     ]);
