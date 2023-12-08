@@ -12,6 +12,7 @@ exports.register = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { email, firstName, lastName, gender, password, securityQuestion } =
       req.body;
+
     const _user = await User.findOne({ email: email });
     if (_user && _user.emailVerified) return res.sendStatus(400);
     if (_user && !_user.emailVerified) {

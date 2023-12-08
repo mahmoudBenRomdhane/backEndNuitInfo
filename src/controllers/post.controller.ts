@@ -91,7 +91,9 @@ exports.addReaction = async (
   next: NextFunction
 ) => {
   try {
+    console.log("1");
     const { postId, status } = req.body;
+    console.log("");
     const user = res.locals.decoded;
     await new Reaction({
       postId: postId,
@@ -99,16 +101,23 @@ exports.addReaction = async (
       status: status,
     }).save();
     let updateQuery = {};
+    console.log("123", updateQuery);
+
     if (status === "up") {
       updateQuery = { $inc: { upvote: 1 } };
     } else if (status === "down") {
       updateQuery = { $inc: { downVote: 1 } };
+    } else {
+      res.status(400).json({ message: "error" });
     }
-
-    await PostModel.findByIdAndUpdate(postId, postId, updateQuery, {
-      new: true,
+    console.log("123", updateQuery);
+    await PostModel.findByIdAndUpdate(postId, updateQuery);
+    res.status(201).json({
+      message: "mrigel",
     });
   } catch (err) {
+    console.log("erferfe", err);
+
     res.status(400).json({
       message: "err",
     });
